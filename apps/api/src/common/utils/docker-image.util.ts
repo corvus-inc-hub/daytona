@@ -43,7 +43,7 @@ export class DockerImage implements DockerImageInfo {
       name = `${this.registry}/${name}`
     }
     if (this.tag) {
-      name = `${name}:${this.tag}`
+      name = this.tag.startsWith('sha256:') ? `${name}@${this.tag}` : `${name}:${this.tag}`
     }
     return name
   }
