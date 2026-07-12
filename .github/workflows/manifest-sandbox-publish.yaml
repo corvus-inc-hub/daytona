@@ -92,7 +92,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload digest receipts
-        uses: actions/upload-artifact@b7c54a5ac8b03754da7b1b52a9c6ab0d8301b51c # v6.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: manifest-sandbox-${{ inputs.version }}-digests
           path: manifest-sandbox-images.jsonl
