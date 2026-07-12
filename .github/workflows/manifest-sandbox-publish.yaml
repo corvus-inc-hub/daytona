@@ -58,7 +58,7 @@ jobs:
       - name: Verify digest image references
         run: >-
           yarn nx test api --runTestsByPath
-          apps/api/src/common/utils/docker-image.util.spec.ts --runInBand
+          src/common/utils/docker-image.util.spec.ts --runInBand
 
       - name: Authenticate to the owned registry
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
