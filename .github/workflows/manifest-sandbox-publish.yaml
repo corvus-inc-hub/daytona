@@ -1,6 +1,10 @@
 name: Manifest Sandbox publish
 
 on:
+  push:
+    branches: [manifest-sandbox/v0.190.0]
+    paths:
+      - .github/workflows/manifest-sandbox-publish.yaml
   workflow_dispatch:
     inputs:
       version:
@@ -17,7 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  VERSION: ${{ inputs.version }}
+  VERSION: ${{ inputs.version || 'v0.190.0-mnfst.1' }}
   ARCH: -amd64
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   NX_DAEMON: 'false'
