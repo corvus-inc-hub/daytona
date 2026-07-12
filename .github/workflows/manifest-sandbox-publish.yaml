@@ -25,7 +25,6 @@ env:
   ARCH: -amd64
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   NX_DAEMON: 'false'
-  SKIP_COMPUTER_USE_BUILD: 'true'
 
 jobs:
   publish-core:
