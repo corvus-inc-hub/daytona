@@ -1,3 +1,12 @@
+> [!IMPORTANT]
+> **Manifest Sandbox is MNFST's owned continuation of Daytona OSS v0.190.0.**
+>
+> Daytona ended maintenance of this open-source line in June 2026. MNFST preserves
+> the v0.190.0 API and SDK contracts while operating, securing, and evolving the
+> sandbox runtime used by Manifest Agent. Upstream authorship and the AGPL-3.0
+> license remain intact; see [COPYRIGHT](COPYRIGHT), [NOTICE](NOTICE), and
+> [LICENSE](LICENSE).
+
 &nbsp;
 
 <div align="center">
