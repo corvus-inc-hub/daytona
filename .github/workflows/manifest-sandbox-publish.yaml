@@ -1,0 +1,96 @@
+name: Manifest Sandbox publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Immutable Manifest Sandbox release tag
+        required: true
+        default: v0.190.0-mnfst.1
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: manifest-sandbox-${{ inputs.version }}
+  cancel-in-progress: false
+
+env:
+  VERSION: ${{ inputs.version }}
+  ARCH: -amd64
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  NX_DAEMON: 'false'
+  SKIP_COMPUTER_USE_BUILD: 'true'
+
+jobs:
+  publish-core:
+    name: Publish owned linux/amd64 images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout owned source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Set up build toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          install-python: 'false'
+          install-ruby: 'false'
+          install-java: 'false'
+          install-poetry: 'false'
+          install-swag: 'false'
+          run-poetry-install: 'false'
+
+      - name: Generate Go workspace sums
+        run: |
+          go work sync
+          touch go.work.sum
+
+      - name: Authenticate to the owned registry
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish core control and compute images
+        run: |
+          yarn nx run-many \
+            --target=docker \
+            --configuration=production \
+            --projects=api,proxy,runner,ssh-gateway \
+            --parallel=1 \
+            --nxBail=true \
+            --output-style=stream
+
+      - name: Record immutable image digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > manifest-sandbox-images.jsonl
+          for project in api proxy runner ssh-gateway; do
+            image="ghcr.io/corvus-inc-hub/manifest-sandbox-${project}:${VERSION}${ARCH}"
+            digest="$(docker buildx imagetools inspect "$image" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+            test "${digest#sha256:}" != "$digest"
+            jq -cn --arg project "$project" --arg image "$image" --arg digest "$digest" \
+              '{project:$project,image:$image,digest:$digest}' >> manifest-sandbox-images.jsonl
+          done
+          cat manifest-sandbox-images.jsonl
+          {
+            echo '### Manifest Sandbox image receipts'
+            echo
+            echo '```json'
+            cat manifest-sandbox-images.jsonl
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload digest receipts
+        uses: actions/upload-artifact@b7c54a5ac8b03754da7b1b52a9c6ab0d8301b51c # v6.0.0
+        with:
+          name: manifest-sandbox-${{ inputs.version }}-digests
+          path: manifest-sandbox-images.jsonl
+          if-no-files-found: error
+          retention-days: 30
