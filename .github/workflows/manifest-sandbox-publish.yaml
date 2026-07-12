@@ -10,7 +10,7 @@ on:
       version:
         description: Immutable Manifest Sandbox release tag
         required: true
-        default: v0.190.0-mnfst.1
+        default: v0.190.0-mnfst.2
 
 permissions:
   contents: read
@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  VERSION: ${{ inputs.version || 'v0.190.0-mnfst.1' }}
+  VERSION: ${{ inputs.version || 'v0.190.0-mnfst.2' }}
   ARCH: -amd64
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   NX_DAEMON: 'false'
@@ -54,6 +54,11 @@ jobs:
         run: |
           go work sync
           touch go.work.sum
+
+      - name: Verify digest image references
+        run: >-
+          yarn nx test api --runTestsByPath
+          apps/api/src/common/utils/docker-image.util.spec.ts --runInBand
 
       - name: Authenticate to the owned registry
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
