@@ -26,6 +26,7 @@ const (
 	gpuSandboxCPUCores  int64 = 16
 	gpuSandboxMemoryGiB int64 = 256
 	gpuSandboxDiskGiB   int64 = 512
+	sandboxShmSizeBytes int64 = 512 * 1024 * 1024
 )
 
 // androidDeviceLabel is set on containers created for sandboxes tagged as "android-device".
@@ -204,6 +205,7 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		// for their current workloads.
 		Privileged: gpuIndex == nil,
 		Binds:      binds,
+		ShmSize:    sandboxShmSizeBytes,
 	}
 
 	if sandboxDto.OtelEndpoint != nil && strings.Contains(*sandboxDto.OtelEndpoint, "host.docker.internal") {

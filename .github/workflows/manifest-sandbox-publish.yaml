@@ -5,23 +5,25 @@ on:
     branches: [manifest-sandbox/v0.190.0]
     paths:
       - .github/workflows/manifest-sandbox-publish.yaml
+      - apps/runner/pkg/docker/container_configs.go
+      - apps/runner/pkg/docker/container_configs_test.go
   workflow_dispatch:
     inputs:
       version:
         description: Immutable Manifest Sandbox release tag
         required: true
-        default: v0.190.0-mnfst.2
+        default: v0.190.0-mnfst.3
 
 permissions:
   contents: read
   packages: write
 
 concurrency:
-  group: manifest-sandbox-${{ inputs.version }}
+  group: manifest-sandbox-${{ inputs.version || 'v0.190.0-mnfst.3' }}
   cancel-in-progress: false
 
 env:
-  VERSION: ${{ inputs.version || 'v0.190.0-mnfst.2' }}
+  VERSION: ${{ inputs.version || 'v0.190.0-mnfst.3' }}
   ARCH: -amd64
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   NX_DAEMON: 'false'
